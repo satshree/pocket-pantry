@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 // import Head from "next/head";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import toast from "react-hot-toast";
@@ -35,8 +35,11 @@ export default function Home() {
   const homeRouterLink = useRef();
 
   function routeHome() {
-    if (homeRouterLink.current) homeRouterLink.current.click();
-    // useRouter().push(homePageURL);
+    if (homeRouterLink.current) {
+      homeRouterLink.current.click();
+    } else {
+      useRouter().push(homePageURL);
+    }
   }
 
   function signIn() {
@@ -73,7 +76,9 @@ export default function Home() {
 
   let appAuth = loadFromLocalStorage("auth");
 
-  if (appAuth) routeHome();
+  if (appAuth) {
+    routeHome();
+  }
 
   const provider = new GoogleAuthProvider();
   const auth = getAuth(app);
