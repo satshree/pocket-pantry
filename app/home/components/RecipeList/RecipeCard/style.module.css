@@ -1,0 +1,12 @@
+.recipecard {
+  transition: 0.5s;
+}
+
+.recipecard:hover {
+  transform: scale(1.03);
+  transition: 0.5s;
+}
+
+.recipecard .card-header {
+  background-color: #fff;
+}

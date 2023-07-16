@@ -42,6 +42,9 @@ export default class NavBar extends Component {
           <h4>Pantry</h4>
         </div>
         <div>
+          <small>Work in Progress</small>
+        </div>
+        <div>
           <Link href={"/"} className="next-router-link" ref={this.homeRouter} />
           <Dropdown>
             <Dropdown.Toggle variant="text" id="dropdown-basic">
