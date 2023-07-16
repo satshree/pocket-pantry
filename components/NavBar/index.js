@@ -2,14 +2,15 @@
 
 import React, { Component, createRef } from "react";
 import Link from "next/link";
+import Dropdown from "react-bootstrap/Dropdown";
 
 import { loadFromLocalStorage } from "@/localStorage";
 
 import style from "./style.module.css";
 
 export default class NavBar extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       user: {},
@@ -31,17 +32,28 @@ export default class NavBar extends Component {
 
   logOut() {
     localStorage.removeItem("auth");
-    location.reload(true);
+    this.homeRouter.current.click();
   }
 
   render() {
     return (
       <div className={style.navbar}>
-        <div></div>
         <div>
-          {this.state.user.displayName}
+          <h4>Pantry</h4>
+        </div>
+        <div>
           <Link href={"/"} className="next-router-link" ref={this.homeRouter} />
-          <button onClick={this.logOut}>logout</button>
+          <Dropdown>
+            <Dropdown.Toggle variant="text" id="dropdown-basic">
+              {this.state.user.displayName}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <Dropdown.Item as="button" onClick={this.logOut}>
+                Log Out
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </div>
     );

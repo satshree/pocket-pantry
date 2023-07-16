@@ -1,7 +1,10 @@
-import "./globals.css";
+import "../globals.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { Toaster } from "react-hot-toast";
+import NavBar from "@/components/NavBar";
+
+import style from "./main.module.css";
 
 export const metadata = {
   title: "Pocket Pantry",
@@ -21,7 +24,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Toaster />
-        {children}
+        <NavBar />
+        <div className={style.main}>{children}</div>
       </body>
     </html>
   );

@@ -4,10 +4,11 @@ body {
   margin: 0 !important;
   font-family: Helvetica Neue, Roboto, -apple-system, BlinkMacSystemFont,
     sans-serif;
+  height: calc(100vh - 70px);
 }
 
 a {
-  color: inherit;
+  color: #0a79f7;
   text-decoration: none !important;
   transition: 0.2s;
   font-style: normal;
@@ -19,6 +20,7 @@ a {
 
 a:hover {
   transition: 0.2s;
+  color: #0665d1;
 }
 
 .next-router-link {
