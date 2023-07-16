@@ -1,12 +1,34 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 // import Head from "next/head";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import toast from "react-hot-toast";
 
 import bbq from "../assets/img/bbq.svg";
 import google from "../assets/icons/google.png";
 
+// FIREBASE
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
+
+// Initialize Firebase
+export const app = initializeApp(firebaseConfig);
+
 export default function Home() {
+  const provider = new GoogleAuthProvider();
+  const auth = getAuth(app);
+
   return (
     <div
       className="container d-flex align-items-center justify-content-center"
@@ -23,7 +45,40 @@ export default function Home() {
         <br />
         <br />
         <div>
-          <button className="btn btn-block btn-outline-primary">
+          <button
+            className="btn btn-block btn-outline-primary"
+            onClick={() =>
+              signInWithPopup(auth, provider)
+                .then((result) => {
+                  // This gives you a Google Access Token. You can use it to access the Google API.
+                  const credential =
+                    GoogleAuthProvider.credentialFromResult(result);
+
+                  process.env.token = credential.accessToken;
+                  // The signed-in user info.
+                  process.env.user = result.user;
+                  // IdP data available using getAdditionalUserInfo(result)
+                  // ...
+
+                  toast.success("Login successful");
+                })
+                .catch((error) => {
+                  // Handle Errors here.
+                  const errorCode = error.code;
+                  const errorMessage = error.message;
+                  // The email of the user's account used.
+                  // const email = error.customData.email;
+                  // The AuthCredential type that was used.
+                  // const credential = GoogleAuthProvider.credentialFromError(error);
+                  // ...
+
+                  console.log("ERROR", errorCode);
+                  console.log("ERROR", errorMessage);
+
+                  toast.error(errorMessage);
+                })
+            }
+          >
             <div className="w-100 d-flex align-items-center justify-content-between">
               <Image src={google.src} height={20} width={20} alt="Google" />
               <div className="ms-2">Continue with Google</div>

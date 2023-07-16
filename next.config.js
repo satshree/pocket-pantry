@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  env: {
+    user: null,
+    credential: null,
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
