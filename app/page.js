@@ -54,7 +54,7 @@ export default function Home() {
         };
 
         saveToLocalStorage("auth", appAuth);
-        toast.success("Login successful");
+        // toast.success("Login successful");
         routeHome();
       })
       .catch((error) => {
