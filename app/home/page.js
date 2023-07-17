@@ -107,7 +107,9 @@ export default class Home extends Component {
 
   getRecipeList() {
     let { filter, recipes } = this.state;
-    return recipes.filter((recipe) => recipe.name.includes(filter.text));
+    return recipes.filter((recipe) =>
+      recipe.name.toLowerCase().includes(filter.text.toLowerCase())
+    );
   }
 
   deleteRecipe(id) {
