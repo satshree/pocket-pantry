@@ -2,6 +2,10 @@ import React, { Component } from "react";
 
 import { Modal, Form, Button } from "react-bootstrap";
 import toast from "react-hot-toast";
+import { addDoc, collection } from "firebase/firestore";
+
+import { db } from "@/app/page";
+import { loadFromLocalStorage } from "@/localStorage";
 
 export default class RecipeModal extends Component {
   constructor(props) {
@@ -9,9 +13,8 @@ export default class RecipeModal extends Component {
 
     this.state = {
       show: false,
-      add: false,
+      progress: false,
       recipe: {
-        id: "",
         name: "",
         description: "",
         icon: "",
@@ -19,26 +22,52 @@ export default class RecipeModal extends Component {
       },
     };
 
+    this.userID = loadFromLocalStorage("auth").user.uid;
     this.addFormSubmit = this.addFormSubmit.bind(this);
   }
 
   componentDidUpdate() {
-    let { show, add, recipe } = this.state;
+    let { show, recipe } = this.state;
 
     if (show !== this.props.show)
       this.setState({ ...this.state, show: this.props.show });
-
-    if (add !== this.props.add)
-      this.setState({ ...this.state, add: this.props.add });
 
     if (recipe !== this.props.recipe)
       this.setState({ ...this.state, recipe: this.props.recipe });
   }
 
-  addFormSubmit(e) {
+  async addFormSubmit(e) {
     e.preventDefault();
 
-    toast.success("Shaka Laka Boom Boooom");
+    let { recipe } = this.state;
+
+    this.setState({ ...this.state, progress: true });
+    const toastID = toast.loading("Adding new recipe ...");
+
+    try {
+      await addDoc(collection(db, "recipes"), {
+        ...recipe,
+        user: this.userID,
+      });
+
+      toast.success("New recipe added!", {
+        id: toastID,
+      });
+
+      this.setState({ ...this.state, progress: false });
+
+      const fetchToastID = toast.loading("Fetching your recipes");
+      this.props.fetch(fetchToastID);
+
+      this.props.toggle(false);
+    } catch (err) {
+      console.log("ERROR", err);
+      this.setState({ ...this.state, progress: false });
+
+      toast.error("Something went wrong. Please try again", {
+        id: toastID,
+      });
+    }
   }
 
   addForm = () => (
@@ -82,14 +111,23 @@ export default class RecipeModal extends Component {
       </Form.Group>
       <hr />
       <div className="text-center">
-        <Button type="submit" variant="success" className="w-100">
-          Add
+        <Button
+          type="submit"
+          variant="success"
+          className="w-100"
+          disabled={this.state.progress}
+        >
+          {this.state.progress ? (
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          ) : (
+            "Add"
+          )}
         </Button>
       </div>
     </Form>
   );
-
-  recipeDetail = () => <div></div>;
 
   render() {
     return (
@@ -98,16 +136,12 @@ export default class RecipeModal extends Component {
         backdrop="static"
         keyboard={false}
         show={this.state.show}
-        onHide={() => this.props.toggle(false, false, null)}
+        onHide={() => this.props.toggle(false, null)}
       >
-        <Modal.Header onClo closeButton={true}>
-          <Modal.Title>
-            {this.state.add ? "Add New Recipe" : this.state.recipe.name}
-          </Modal.Title>
+        <Modal.Header closeButton={!this.state.progress}>
+          <Modal.Title>Add New Recipe</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {this.state.add ? this.addForm() : this.recipeDetail()}
-        </Modal.Body>
+        <Modal.Body>{this.addForm()}</Modal.Body>
       </Modal>
     );
   }

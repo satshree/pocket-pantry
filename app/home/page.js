@@ -8,17 +8,11 @@ import {
   // faMagnifyingGlass,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 import { loadFromLocalStorage } from "@/localStorage";
 
-import { app } from "../page";
+import { db } from "../page";
 
 import RecipeList from "./components/RecipeList";
 import RecipeModal from "./components/RecipeModal";
@@ -42,7 +36,6 @@ export default class Home extends Component {
       recipes: [],
       modal: {
         show: false,
-        add: false,
         data: {
           id: "",
           name: "",
@@ -53,7 +46,7 @@ export default class Home extends Component {
       },
     };
 
-    this.db = getFirestore(app);
+    this.db = db;
 
     this.auth = loadFromLocalStorage("auth");
 
@@ -64,12 +57,17 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    this.loadRecipes();
+    const toastID = toast.loading("Fetching your recipes");
+    this.loadRecipes(toastID);
   }
 
-  async loadRecipes() {
+  async loadRecipes(toastID = null) {
+    if (!toastID) toast.loading("Fetching your recipes");
+
     let userID = this.auth.user.uid;
     let { recipes } = this.state;
+
+    recipes = [];
 
     let q = query(collection(this.db, "recipes"), where("user", "==", userID));
 
@@ -79,7 +77,7 @@ export default class Home extends Component {
       recipes.push({ id: recipe.id, ...recipe.data() })
     );
 
-    this.setState({ ...this.state, recipes });
+    this.setState({ ...this.state, recipes }, () => toast.dismiss(toastID));
   }
 
   updateFilterText(e) {
@@ -88,19 +86,11 @@ export default class Home extends Component {
     this.setState({ ...this.state, filter });
   }
 
-  toggleRecipeModal(show, add, data) {
+  toggleRecipeModal(show) {
     let { modal } = this.state;
 
-    if (add) {
-      toast("This is a work in progress.");
-    }
-
     modal.show = show;
-    modal.add = add;
-
-    data
-      ? (modal.recipe = data)
-      : (modal.recipe = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA)));
+    modal.data = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA));
 
     this.setState({ ...this.state, modal });
   }
@@ -131,7 +121,7 @@ export default class Home extends Component {
             <Button
               size="sm"
               variant="primary"
-              onClick={() => this.toggleRecipeModal(true, true, null)}
+              onClick={() => this.toggleRecipeModal(true)}
             >
               <FontAwesomeIcon icon={faPlus} />
               <span className="ms-1">Add New Recipe</span>
@@ -144,8 +134,8 @@ export default class Home extends Component {
         </div>
         <RecipeModal
           show={this.state.modal.show}
-          add={this.state.modal.add}
           recipe={this.state.modal.data}
+          fetch={this.loadRecipes}
           toggle={this.toggleRecipeModal}
         />
       </div>
