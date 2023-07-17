@@ -22,7 +22,6 @@ export default class RecipeModal extends Component {
       },
     };
 
-    this.userID = loadFromLocalStorage("auth").user.uid;
     this.addFormSubmit = this.addFormSubmit.bind(this);
   }
 
@@ -44,11 +43,12 @@ export default class RecipeModal extends Component {
     this.setState({ ...this.state, progress: true });
     const toastID = toast.loading("Adding new recipe ...");
 
+    let userID = loadFromLocalStorage("auth").user.uid;
     try {
       delete recipe["id"];
       await addDoc(collection(db, "recipes"), {
         ...recipe,
-        user: this.userID,
+        user: userID,
       });
 
       toast.success("New recipe added!", {
