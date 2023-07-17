@@ -8,6 +8,17 @@ import {
   // faMagnifyingGlass,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+
+import { loadFromLocalStorage } from "@/localStorage";
+
+import { app } from "../page";
 
 import RecipeList from "./components/RecipeList";
 import RecipeModal from "./components/RecipeModal";
@@ -25,7 +36,7 @@ export default class Home extends Component {
     super(props);
 
     this.state = {
-      search: {
+      filter: {
         text: "",
       },
       recipes: [],
@@ -42,14 +53,39 @@ export default class Home extends Component {
       },
     };
 
-    this.updateSearchText = this.updateSearchText.bind(this);
+    this.db = getFirestore(app);
+
+    this.auth = loadFromLocalStorage("auth");
+
+    this.loadRecipes = this.loadRecipes.bind(this);
+    this.getRecipeList = this.getRecipeList.bind(this);
+    this.updateFilterText = this.updateFilterText.bind(this);
     this.toggleRecipeModal = this.toggleRecipeModal.bind(this);
   }
 
-  updateSearchText(e) {
-    let { search } = this.state;
-    search.text = e.target.value;
-    this.setState({ ...this.state, search });
+  componentDidMount() {
+    this.loadRecipes();
+  }
+
+  async loadRecipes() {
+    let userID = this.auth.user.uid;
+    let { recipes } = this.state;
+
+    let q = query(collection(this.db, "recipes"), where("user", "==", userID));
+
+    let recipeDoc = await getDocs(q);
+
+    recipeDoc.forEach((recipe) =>
+      recipes.push({ id: recipe.id, ...recipe.data() })
+    );
+
+    this.setState({ ...this.state, recipes });
+  }
+
+  updateFilterText(e) {
+    let { filter } = this.state;
+    filter.text = e.target.value;
+    this.setState({ ...this.state, filter });
   }
 
   toggleRecipeModal(show, add, data) {
@@ -69,6 +105,11 @@ export default class Home extends Component {
     this.setState({ ...this.state, modal });
   }
 
+  getRecipeList() {
+    let { filter, recipes } = this.state;
+    return recipes.filter((recipe) => recipe.name.includes(filter.text));
+  }
+
   render() {
     return (
       <div>
@@ -76,9 +117,9 @@ export default class Home extends Component {
           <div className="me-1 w-50">
             <InputGroup>
               <FormControl
-                placeholder="Search"
-                value={this.state.search.text}
-                onChange={this.updateSearchText}
+                placeholder="Filter"
+                value={this.state.filter.text}
+                onChange={this.updateFilterText}
                 required={true}
               />
               {/* <Button variant="primary" type="submit">
@@ -99,7 +140,7 @@ export default class Home extends Component {
         </div>
         <br />
         <div>
-          <RecipeList recipes={this.state.recipes} />
+          <RecipeList recipes={this.getRecipeList()} />
         </div>
         <RecipeModal
           show={this.state.modal.show}
