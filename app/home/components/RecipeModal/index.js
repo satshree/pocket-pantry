@@ -45,6 +45,7 @@ export default class RecipeModal extends Component {
     const toastID = toast.loading("Adding new recipe ...");
 
     try {
+      delete recipe["id"];
       await addDoc(collection(db, "recipes"), {
         ...recipe,
         user: this.userID,

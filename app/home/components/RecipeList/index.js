@@ -34,9 +34,13 @@ export default class RecipeList extends Component {
 
   allRecipe = () => (
     <Row>
-      {this.state.recipes.map((recipy, index) => (
+      {this.state.recipes.map((recipe, index) => (
         <Col md={4} className="mb-3">
-          <RecipeCard recipe={recipy} key={index} />
+          <RecipeCard
+            recipe={recipe}
+            key={index}
+            deleteRecipe={this.props.deleteRecipe}
+          />
         </Col>
       ))}
     </Row>

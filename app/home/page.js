@@ -8,7 +8,15 @@ import {
   // faMagnifyingGlass,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  doc,
+  where,
+  getDocs,
+  deleteDoc,
+} from "firebase/firestore";
+import swal from "sweetalert";
 
 import { loadFromLocalStorage } from "@/localStorage";
 
@@ -16,6 +24,7 @@ import { db } from "../page";
 
 import RecipeList from "./components/RecipeList";
 import RecipeModal from "./components/RecipeModal";
+// import DeleteRecipeModal from "./components/DeleteRecipeModal/page";
 
 const RECIPE_DUMMY_DATA = {
   id: "",
@@ -51,6 +60,7 @@ export default class Home extends Component {
     this.auth = loadFromLocalStorage("auth");
 
     this.loadRecipes = this.loadRecipes.bind(this);
+    this.deleteRecipe = this.deleteRecipe.bind(this);
     this.getRecipeList = this.getRecipeList.bind(this);
     this.updateFilterText = this.updateFilterText.bind(this);
     this.toggleRecipeModal = this.toggleRecipeModal.bind(this);
@@ -100,6 +110,41 @@ export default class Home extends Component {
     return recipes.filter((recipe) => recipe.name.includes(filter.text));
   }
 
+  deleteRecipe(id) {
+    swal({
+      title: "Are you sure you want to delete this recipe?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      dangerMode: true,
+      buttons: {
+        confirm: {
+          text: "Yes, Delete this recipe",
+          value: true,
+          visible: true,
+        },
+        cancel: {
+          text: "No, cancel",
+          value: false,
+          visible: true,
+        },
+      },
+    }).then(async (value) => {
+      if (value) {
+        const deleteToastID = toast.loading("Deleting...");
+        try {
+          await deleteDoc(doc(this.db, "recipes", id));
+          toast.success("Recipe deleted");
+
+          this.loadRecipes();
+        } catch (err) {
+          console.log("ERROR", err);
+          toast.error("Something went wrong. Please try again.");
+        }
+        toast.dismiss(deleteToastID);
+      }
+    });
+  }
+
   render() {
     return (
       <div>
@@ -130,7 +175,10 @@ export default class Home extends Component {
         </div>
         <br />
         <div>
-          <RecipeList recipes={this.getRecipeList()} />
+          <RecipeList
+            recipes={this.getRecipeList()}
+            deleteRecipe={this.deleteRecipe}
+          />
         </div>
         <RecipeModal
           show={this.state.modal.show}
