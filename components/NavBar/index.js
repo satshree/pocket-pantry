@@ -2,11 +2,19 @@
 
 import React, { Component, createRef } from "react";
 import Link from "next/link";
-import Dropdown from "react-bootstrap/Dropdown";
+import Image from "next/image";
+import {
+  // Dropdown,
+  Button,
+} from "react-bootstrap/";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 import { loadFromLocalStorage } from "@/localStorage";
 
 import style from "./style.module.css";
+
+import logo from "@/assets/img/cooking.png";
 
 export default class NavBar extends Component {
   constructor(props) {
@@ -39,24 +47,19 @@ export default class NavBar extends Component {
     return (
       <div className={style.navbar}>
         <div>
-          <h4>Pantry</h4>
+          <Image src={logo.src} height={50} width={50} alt="pantry" />
         </div>
-        <div>
-          <small>Work in Progress</small>
+        <div className="text-center">
+          <h5 className="ms-2">
+            Welcome to your Pantry, {this.state.user.displayName}
+          </h5>
         </div>
         <div>
           <Link href={"/"} className="next-router-link" ref={this.homeRouter} />
-          <Dropdown>
-            <Dropdown.Toggle variant="text" id="dropdown-basic">
-              {this.state.user.displayName}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              <Dropdown.Item as="button" onClick={this.logOut}>
-                Log Out
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+          <Button variant="danger" size="sm" onClick={this.logOut}>
+            <FontAwesomeIcon icon={faRightFromBracket} />
+            <span className="ms-2 hide-on-mobile">Log Out</span>
+          </Button>
         </div>
       </div>
     );
