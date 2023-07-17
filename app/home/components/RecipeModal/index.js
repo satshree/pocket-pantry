@@ -138,6 +138,7 @@ export default class RecipeModal extends Component {
         keyboard={false}
         show={this.state.show}
         onHide={() => this.props.toggle(false, null)}
+        centered={true}
       >
         <Modal.Header closeButton={!this.state.progress}>
           <Modal.Title>Add New Recipe</Modal.Title>

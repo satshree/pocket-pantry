@@ -7,6 +7,10 @@ body {
   height: calc(100vh - 70px);
 }
 
+img {
+  pointer-events: none;
+}
+
 a {
   color: #0a79f7;
   text-decoration: none !important;
