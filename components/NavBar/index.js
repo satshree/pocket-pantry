@@ -50,8 +50,8 @@ export default class NavBar extends Component {
           <Image src={logo.src} height={50} width={50} alt="pantry" />
         </div>
         <div className="text-center">
-          <h5 className="ms-2">
-            Welcome to your Pantry, {this.state.user.displayName}
+          <h5 className={style.welcomenote}>
+            Welcome to your Pantry, <span>{this.state.user.displayName}</span>
           </h5>
         </div>
         <div>
