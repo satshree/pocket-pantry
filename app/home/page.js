@@ -226,6 +226,7 @@ export default class Home extends Component {
           recipe={this.state.canvas.data}
           fetch={this.loadRecipes}
           toggle={this.toggleRecipeCanvas}
+          toggleModal={this.toggleRecipeModal}
         />
       </div>
     );

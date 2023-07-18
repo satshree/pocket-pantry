@@ -1,11 +1,8 @@
 import React, { Component } from "react";
-import {
-  Offcanvas,
-  Row,
-  Col,
-  // Button
-} from "react-bootstrap";
+import { Offcanvas, Row, Col, Button } from "react-bootstrap";
 // import { toast } from "react-hot-toast";
+
+import style from "./style.module.css";
 
 export default class RecipeCanvas extends Component {
   constructor(props) {
@@ -54,14 +51,25 @@ export default class RecipeCanvas extends Component {
           <Offcanvas.Title>{this.state.recipe.name}</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <Row>
+          <Row className="h-100">
             <Col md={4}>
-              <p>{this.state.recipe.description}</p>
+              <pre className={style.descriptionbox}>
+                {this.state.recipe.description}
+              </pre>
+              <Button
+                size="sm"
+                variant="text"
+                onClick={() => this.props.toggleModal(true, this.state.recipe)}
+              >
+                Edit
+              </Button>
               <hr />
               <small>Notes work in progress</small>
             </Col>
             <Col>
-              <small>Ingredients work in progress</small>
+              <div className={style.ingredientsbox}>
+                <small>Ingredients work in progress</small>
+              </div>
             </Col>
           </Row>
         </Offcanvas.Body>
