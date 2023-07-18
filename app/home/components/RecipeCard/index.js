@@ -24,7 +24,7 @@ export default class RecipeCard extends Component {
                   size="sm"
                   variant="outline-secondary"
                   onClick={() =>
-                    this.props.toggleCanvas(true, this.props.recipe)
+                    this.props.toggleModal(true, this.props.recipe)
                   }
                 >
                   <FontAwesomeIcon icon={faFilePen} />

@@ -41,6 +41,7 @@ export default class RecipeList extends Component {
             key={index}
             deleteRecipe={this.props.deleteRecipe}
             toggleCanvas={this.props.toggleCanvas}
+            toggleModal={this.props.toggleModal}
           />
         </Col>
       ))}

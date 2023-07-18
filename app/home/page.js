@@ -45,6 +45,7 @@ export default class Home extends Component {
       recipes: [],
       modal: {
         show: false,
+        edit: false,
         data: {
           id: "",
           name: "",
@@ -107,11 +108,17 @@ export default class Home extends Component {
     this.setState({ ...this.state, filter });
   }
 
-  toggleRecipeModal(show) {
+  toggleRecipeModal(show, data = null) {
     let { modal } = this.state;
 
     modal.show = show;
-    modal.data = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA));
+    if (data === null) {
+      modal.edit = false;
+      modal.data = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA));
+    } else {
+      modal.edit = true;
+      modal.data = data;
+    }
 
     this.setState({ ...this.state, modal });
   }
@@ -204,10 +211,12 @@ export default class Home extends Component {
             deleteRecipe={this.deleteRecipe}
             loadRecipes={this.loadRecipes}
             toggleCanvas={this.toggleRecipeCanvas}
+            toggleModal={this.toggleRecipeModal}
           />
         </div>
         <RecipeModal
           show={this.state.modal.show}
+          edit={this.state.modal.edit}
           recipe={this.state.modal.data}
           fetch={this.loadRecipes}
           toggle={this.toggleRecipeModal}
