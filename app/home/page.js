@@ -24,7 +24,7 @@ import { db } from "../page";
 
 import RecipeList from "./components/RecipeList";
 import RecipeModal from "./components/RecipeModal";
-// import DeleteRecipeModal from "./components/DeleteRecipeModal/page";
+import RecipeCanvas from "./components/RecipeCanvas";
 
 const RECIPE_DUMMY_DATA = {
   id: "",
@@ -53,6 +53,16 @@ export default class Home extends Component {
           theme: "",
         },
       },
+      canvas: {
+        show: false,
+        data: {
+          id: "",
+          name: "",
+          description: "",
+          icon: "",
+          theme: "",
+        },
+      },
     };
 
     this.db = db;
@@ -64,6 +74,7 @@ export default class Home extends Component {
     this.getRecipeList = this.getRecipeList.bind(this);
     this.updateFilterText = this.updateFilterText.bind(this);
     this.toggleRecipeModal = this.toggleRecipeModal.bind(this);
+    this.toggleRecipeCanvas = this.toggleRecipeCanvas.bind(this);
   }
 
   componentDidMount() {
@@ -103,6 +114,17 @@ export default class Home extends Component {
     modal.data = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA));
 
     this.setState({ ...this.state, modal });
+  }
+
+  toggleRecipeCanvas(show, data) {
+    let { canvas } = this.state;
+
+    canvas.show = show;
+    data
+      ? (canvas.data = data)
+      : (canvas.data = JSON.parse(JSON.stringify(RECIPE_DUMMY_DATA)));
+
+    this.setState({ ...this.state, canvas });
   }
 
   getRecipeList() {
@@ -180,6 +202,8 @@ export default class Home extends Component {
           <RecipeList
             recipes={this.getRecipeList()}
             deleteRecipe={this.deleteRecipe}
+            loadRecipes={this.loadRecipes}
+            toggleCanvas={this.toggleRecipeCanvas}
           />
         </div>
         <RecipeModal
@@ -187,6 +211,12 @@ export default class Home extends Component {
           recipe={this.state.modal.data}
           fetch={this.loadRecipes}
           toggle={this.toggleRecipeModal}
+        />
+        <RecipeCanvas
+          show={this.state.canvas.show}
+          recipe={this.state.canvas.data}
+          fetch={this.loadRecipes}
+          toggle={this.toggleRecipeCanvas}
         />
       </div>
     );

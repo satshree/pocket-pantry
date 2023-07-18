@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
 
-import RecipeCard from "./RecipeCard";
+import RecipeCard from "../RecipeCard";
 
 // const dummy = {
 //   name: "hello",
@@ -40,6 +40,7 @@ export default class RecipeList extends Component {
             recipe={recipe}
             key={index}
             deleteRecipe={this.props.deleteRecipe}
+            toggleCanvas={this.props.toggleCanvas}
           />
         </Col>
       ))}

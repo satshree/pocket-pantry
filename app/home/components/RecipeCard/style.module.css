@@ -7,6 +7,10 @@
   transition: 0.5s;
 }
 
-.recipecard .card-header {
+.recipecardheader {
   background-color: #fff;
+}
+
+.recipecardbody:hover {
+  cursor: pointer;
 }
