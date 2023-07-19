@@ -1,5 +1,13 @@
+.card {
+  height: 200px;
+}
+
 .recipecard {
   transition: 0.5s;
+}
+
+.recipecard .card {
+  height: 200px;
 }
 
 .recipecard:hover {
@@ -8,9 +16,24 @@
 }
 
 .recipecardheader {
-  background-color: #fff;
+  height: 120px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
 }
 
-.recipecardbody:hover {
+.recipecardheader .tint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffffba;
+  z-index: 0;
+}
+
+.recipecardbody:hover,
+.recipecardheader .tint:hover {
   cursor: pointer;
 }

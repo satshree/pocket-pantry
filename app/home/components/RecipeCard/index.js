@@ -1,28 +1,58 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 
-import { Card, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faFilePen } from "@fortawesome/free-solid-svg-icons";
+import { Card } from "react-bootstrap";
 
 import style from "./style.module.css";
 
+import def from "@/assets/img/defaultimg.jpg";
+
 export default class RecipeCard extends Component {
+  constructor(props) {
+    super(props);
+
+    this.header = createRef();
+  }
+
+  componentDidMount() {
+    if (this.header.current) {
+      this.header.current.style.backgroundImage = `url(${
+        this.props.recipe.image || def.src
+      })`;
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.header.current) {
+      this.header.current.style.backgroundImage = `url(${
+        this.props.recipe.image || def.src
+      })`;
+    }
+  }
+
   render() {
     return (
       <div className={style.recipecard}>
-        <Card>
-          <Card.Header className={style.recipecardheader}>
-            <div className="d-flex align-items-center justify-content-between w-100">
+        <Card className={style.card}>
+          <Card.Header ref={this.header} className={style.recipecardheader}>
+            <div
+              className={style.tint}
+              onClick={() => this.props.toggleCanvas(true, this.props.recipe)}
+            />
+            <div
+              className="d-flex align-items-center justify-content-between w-100 h-100"
+              onClick={() => this.props.toggleCanvas(true, this.props.recipe)}
+              style={{ zIndex: 1 }}
+            >
               <div
                 className={`${style.recipecardbody} w-75`}
-                onClick={() => this.props.toggleCanvas(true, this.props.recipe)}
+                style={{ zIndex: 1 }}
               >
                 <Card.Title>{this.props.recipe.name}</Card.Title>
               </div>
-              <div className="btn-group">
+              {/* <div className="btn-group">
                 <Button
                   size="sm"
-                  variant="outline-secondary"
+                  variant="secondary"
                   onClick={() =>
                     this.props.toggleModal(true, this.props.recipe)
                   }
@@ -31,19 +61,19 @@ export default class RecipeCard extends Component {
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline-danger"
+                  variant="danger"
                   onClick={() => this.props.deleteRecipe(this.props.recipe.id)}
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </Button>
-              </div>
+              </div> */}
             </div>
           </Card.Header>
           <Card.Body
             className={style.recipecardbody}
             onClick={() => this.props.toggleCanvas(true, this.props.recipe)}
           >
-            <div>{this.props.recipe.description}</div>
+            <small>{this.props.recipe.description}</small>
           </Card.Body>
         </Card>
       </div>

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Offcanvas, Row, Col, Button } from "react-bootstrap";
 // import { toast } from "react-hot-toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faFilePen } from "@fortawesome/free-solid-svg-icons";
 
 import style from "./style.module.css";
 
@@ -14,7 +16,7 @@ export default class RecipeCanvas extends Component {
         id: "",
         name: "",
         description: "",
-        icon: "",
+        image: "",
         theme: "",
       },
     };
@@ -52,17 +54,30 @@ export default class RecipeCanvas extends Component {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Row className="h-100">
-            <Col md={4}>
+            <Col md={6}>
               <pre className={style.descriptionbox}>
                 {this.state.recipe.description}
               </pre>
-              <Button
-                size="sm"
-                variant="text"
-                onClick={() => this.props.toggleModal(true, this.state.recipe)}
-              >
-                Edit
-              </Button>
+              <div className="text-center">
+                <Button
+                  className="m-1"
+                  size="sm"
+                  variant="outline-secondary"
+                  onClick={() =>
+                    this.props.toggleModal(true, this.state.recipe)
+                  }
+                >
+                  <FontAwesomeIcon icon={faFilePen} />
+                </Button>
+                <Button
+                  className="m-1"
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={() => this.props.deleteRecipe(this.state.recipe.id)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </Button>
+              </div>
               <hr />
               <small>Notes work in progress</small>
             </Col>

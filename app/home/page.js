@@ -164,6 +164,8 @@ export default class Home extends Component {
         const deleteToastID = toast.loading("Deleting...");
         try {
           await deleteDoc(doc(this.db, "recipes", id));
+
+          this.toggleRecipeCanvas(false, null);
           toast.success("Recipe deleted");
 
           this.loadRecipes();
@@ -227,6 +229,7 @@ export default class Home extends Component {
           fetch={this.loadRecipes}
           toggle={this.toggleRecipeCanvas}
           toggleModal={this.toggleRecipeModal}
+          deleteRecipe={this.deleteRecipe}
         />
       </div>
     );

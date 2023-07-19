@@ -104,33 +104,36 @@ export default class RecipeModal extends Component {
   }
 
   uploadedImage(file) {
-    let { uploadedImage, recipe } = this.state;
+    if (file[0].size > 150000) {
+      toast("Image size too large! Try compressing it");
+    } else {
+      let { uploadedImage, recipe } = this.state;
 
-    let reader = new FileReader();
-    reader.readAsDataURL(file[0]);
+      let reader = new FileReader();
+      reader.readAsDataURL(file[0]);
 
-    reader.onprogress = () => {
-      uploadedImage.name = "Please wait ...";
-      this.setState({ ...this.state, uploadedImage });
-    };
+      reader.onprogress = () => {
+        uploadedImage.name = "Please wait ...";
+        this.setState({ ...this.state, uploadedImage });
+      };
 
-    reader.onload = () => {
-      uploadedImage.name = file[0].name;
-      uploadedImage.meta = file[0];
-      uploadedImage.b64 = reader.result;
+      reader.onload = () => {
+        uploadedImage.name = file[0].name;
+        uploadedImage.meta = file[0];
+        uploadedImage.b64 = reader.result;
 
-      recipe.image = reader.result;
-      console.log("here", recipe);
-      this.setState({ ...this.state, uploadedImage, recipe });
-    };
+        recipe.image = reader.result;
+        this.setState({ ...this.state, uploadedImage, recipe });
+      };
 
-    reader.onerror = (error) => {
-      console.log("ERROR", error);
-      toast.error("Something went wrong. Please try uploading again.");
+      reader.onerror = (error) => {
+        console.log("ERROR", error);
+        toast.error("Something went wrong. Please try uploading again.");
 
-      uploadedImage.name = "";
-      this.setState({ ...this.state, uploadedImage });
-    };
+        uploadedImage.name = "";
+        this.setState({ ...this.state, uploadedImage });
+      };
+    }
   }
 
   resetImage() {
