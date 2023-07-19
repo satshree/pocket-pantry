@@ -1,11 +1,14 @@
+import Image from "next/image";
 import React, { Component } from "react";
-
 import { Modal, Form, Button } from "react-bootstrap";
+import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
 import { addDoc, setDoc, collection, doc } from "firebase/firestore";
 
 import { db } from "@/app/page";
 import { loadFromLocalStorage } from "@/localStorage";
+
+import style from "./style.module.css";
 
 export default class RecipeModal extends Component {
   constructor(props) {
@@ -15,30 +18,46 @@ export default class RecipeModal extends Component {
       show: false,
       progress: false,
       recipe: {
+        id: "",
         name: "",
         description: "",
-        icon: "",
+        image: "",
         theme: "",
+      },
+      uploadedImage: {
+        name: "",
+        b64: "",
+        meta: null,
       },
     };
 
     this.formSubmit = this.formSubmit.bind(this);
+    this.resetImage = this.resetImage.bind(this);
+    this.uploadedImage = this.uploadedImage.bind(this);
   }
 
   componentDidUpdate() {
-    let { show, recipe } = this.state;
+    let { show, recipe, uploadedImage } = this.state;
 
     if (show !== this.props.show)
       this.setState({ ...this.state, show: this.props.show });
 
-    if (recipe !== this.props.recipe)
-      this.setState({ ...this.state, recipe: this.props.recipe });
+    if (recipe !== this.props.recipe) {
+      if (!recipe.image) {
+        uploadedImage.b64 = this.props.recipe.image;
+      }
+
+      this.setState({
+        ...this.state,
+        recipe: this.props.recipe,
+      });
+    }
   }
 
   async formSubmit(e) {
     e.preventDefault();
 
-    let { recipe } = this.state;
+    let { uploadedImage, recipe } = this.state;
 
     this.setState({ ...this.state, progress: true });
     const toastID = toast.loading(
@@ -53,11 +72,13 @@ export default class RecipeModal extends Component {
       if (this.props.edit) {
         await setDoc(doc(db, "recipes", recipeID), {
           ...recipe,
+          image: uploadedImage.b64,
           user: userID,
         });
       } else {
         await addDoc(collection(db, "recipes"), {
           ...recipe,
+          image: uploadedImage.b64,
           user: userID,
         });
       }
@@ -82,6 +103,46 @@ export default class RecipeModal extends Component {
     }
   }
 
+  uploadedImage(file) {
+    let { uploadedImage, recipe } = this.state;
+
+    let reader = new FileReader();
+    reader.readAsDataURL(file[0]);
+
+    reader.onprogress = () => {
+      uploadedImage.name = "Please wait ...";
+      this.setState({ ...this.state, uploadedImage });
+    };
+
+    reader.onload = () => {
+      uploadedImage.name = file[0].name;
+      uploadedImage.meta = file[0];
+      uploadedImage.b64 = reader.result;
+
+      recipe.image = reader.result;
+      console.log("here", recipe);
+      this.setState({ ...this.state, uploadedImage, recipe });
+    };
+
+    reader.onerror = (error) => {
+      console.log("ERROR", error);
+      toast.error("Something went wrong. Please try uploading again.");
+
+      uploadedImage.name = "";
+      this.setState({ ...this.state, uploadedImage });
+    };
+  }
+
+  resetImage() {
+    let { uploadedImage } = this.state;
+
+    uploadedImage.name = "";
+    uploadedImage.b64 = "";
+    uploadedImage.meta = null;
+
+    this.setState({ ...this.state, uploadedImage });
+  }
+
   render() {
     return (
       <Modal
@@ -92,7 +153,10 @@ export default class RecipeModal extends Component {
         onHide={() =>
           this.props.toggle(false, this.props.edit ? this.state.recipe : null)
         }
-        onExited={() => this.props.toggle(false, null)}
+        onExited={() => {
+          this.resetImage();
+          this.props.toggle(false, null);
+        }}
         centered={true}
       >
         <Modal.Header closeButton={!this.state.progress}>
@@ -132,12 +196,47 @@ export default class RecipeModal extends Component {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Icon</Form.Label>
+              <Form.Label>Theme</Form.Label>
               <Form.Control placeholder="Work in Progress" disabled={true} />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Theme</Form.Label>
-              <Form.Control placeholder="Work in Progress" disabled={true} />
+              <Form.Label>
+                Image <small>(Optional)</small>
+              </Form.Label>
+              <Dropzone
+                onDrop={(acceptedFiles) => this.uploadedImage(acceptedFiles)}
+              >
+                {({ getRootProps, getInputProps }) => (
+                  <section className={style.filedropzone}>
+                    <div
+                      className="d-flex align-items-center justify-content-center w-100 h-100"
+                      style={{ flexDirection: "column" }}
+                      {...getRootProps()}
+                    >
+                      <input {...getInputProps()} />
+                      {this.state.uploadedImage.b64 ? (
+                        <div className="mb-3">
+                          <Image
+                            src={this.state.uploadedImage.b64}
+                            width={80}
+                            height={80}
+                            alt="image"
+                          />
+                        </div>
+                      ) : null}
+                      <small>Drag, drop or click to select image</small>
+                    </div>
+                  </section>
+                )}
+              </Dropzone>
+              {this.state.uploadedImage.b64 ? (
+                <div className="text-center">
+                  <br />
+                  <Button variant="text" size="sm" onClick={this.resetImage}>
+                    <small>Remove Image</small>
+                  </Button>
+                </div>
+              ) : null}
             </Form.Group>
             <hr />
             <div className="text-center">

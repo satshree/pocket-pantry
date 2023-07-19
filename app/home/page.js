@@ -30,7 +30,7 @@ const RECIPE_DUMMY_DATA = {
   id: "",
   name: "",
   description: "",
-  icon: "",
+  image: "",
   theme: "",
 };
 
@@ -50,7 +50,7 @@ export default class Home extends Component {
           id: "",
           name: "",
           description: "",
-          icon: "",
+          image: "",
           theme: "",
         },
       },
@@ -60,7 +60,7 @@ export default class Home extends Component {
           id: "",
           name: "",
           description: "",
-          icon: "",
+          image: "",
           theme: "",
         },
       },
