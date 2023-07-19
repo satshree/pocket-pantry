@@ -106,6 +106,8 @@ export default class RecipeModal extends Component {
   uploadedImage(file) {
     if (file[0].size > 150000) {
       toast("Image size too large! Try compressing it");
+    } else if (file[0].type.indexOf("image") === -1) {
+      toast("Please select only PNG or JPEG/JPG images");
     } else {
       let { uploadedImage, recipe } = this.state;
 
@@ -207,6 +209,7 @@ export default class RecipeModal extends Component {
                 Image <small>(Optional)</small>
               </Form.Label>
               <Dropzone
+                maxFiles={1}
                 onDrop={(acceptedFiles) => this.uploadedImage(acceptedFiles)}
               >
                 {({ getRootProps, getInputProps }) => (
