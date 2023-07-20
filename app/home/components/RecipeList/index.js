@@ -35,10 +35,9 @@ export default class RecipeList extends Component {
   allRecipe = () => (
     <Row>
       {this.state.recipes.map((recipe, index) => (
-        <Col md={4} className="mb-3">
+        <Col md={4} className="mb-3" key={index}>
           <RecipeCard
             recipe={recipe}
-            key={index}
             deleteRecipe={this.props.deleteRecipe}
             toggleCanvas={this.props.toggleCanvas}
             toggleModal={this.props.toggleModal}

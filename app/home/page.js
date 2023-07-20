@@ -31,6 +31,7 @@ const RECIPE_DUMMY_DATA = {
   name: "",
   description: "",
   image: "",
+  ingredients: [],
 };
 
 export default class Home extends Component {
@@ -42,6 +43,7 @@ export default class Home extends Component {
         text: "",
       },
       recipes: [],
+      ingredients: {},
       modal: {
         show: false,
         edit: false,
@@ -59,6 +61,7 @@ export default class Home extends Component {
           name: "",
           description: "",
           image: "",
+          ingredients: [],
         },
       },
     };
@@ -70,6 +73,7 @@ export default class Home extends Component {
     this.loadRecipes = this.loadRecipes.bind(this);
     this.deleteRecipe = this.deleteRecipe.bind(this);
     this.getRecipeList = this.getRecipeList.bind(this);
+    this.loadIngredients = this.loadIngredients.bind(this);
     this.updateFilterText = this.updateFilterText.bind(this);
     this.toggleRecipeModal = this.toggleRecipeModal.bind(this);
     this.toggleRecipeCanvas = this.toggleRecipeCanvas.bind(this);
@@ -81,7 +85,7 @@ export default class Home extends Component {
   }
 
   async loadRecipes(toastID = null) {
-    if (!toastID) toast.loading("Fetching your recipes");
+    // if (!toastID) toast.loading("Fetching your recipes");
 
     let userID = this.auth.user.uid;
     let { recipes } = this.state;
@@ -92,11 +96,42 @@ export default class Home extends Component {
 
     let recipeDoc = await getDocs(q);
 
-    recipeDoc.forEach((recipe) =>
-      recipes.push({ id: recipe.id, ...recipe.data() })
-    );
+    recipeDoc.forEach((recipe) => {
+      let data = {
+        id: recipe.id,
+        ...recipe.data(),
+      };
 
-    this.setState({ ...this.state, recipes }, () => toast.dismiss(toastID));
+      recipes.push(data);
+    });
+
+    this.setState({ ...this.state, recipes }, () => {
+      if (toastID) toast.dismiss(toastID);
+
+      this.loadIngredients();
+    });
+  }
+
+  async loadIngredients() {
+    let { ingredients, recipes } = this.state;
+
+    for (let recipe of recipes) {
+      try {
+        let ingredientDoc = await getDocs(
+          query(collection(db, "recipes", recipe.id, "sections"))
+        );
+        let ingredientsList = [];
+
+        ingredientDoc.forEach((section) =>
+          ingredientsList.push({ id: section.id, ...section.data() })
+        );
+        ingredients[recipe.id] = ingredientsList;
+      } catch {
+        ingredients[recipe.id] = [];
+      }
+    }
+
+    this.setState({ ...this.state, ingredients });
   }
 
   updateFilterText(e) {
@@ -132,7 +167,12 @@ export default class Home extends Component {
   }
 
   getRecipeList() {
-    let { filter, recipes } = this.state;
+    let { filter, recipes, ingredients } = this.state;
+
+    for (let recipe of recipes) {
+      recipe.ingredients = ingredients[recipe.id];
+    }
+
     return recipes.filter((recipe) =>
       recipe.name.toLowerCase().includes(filter.text.toLowerCase())
     );
@@ -187,9 +227,6 @@ export default class Home extends Component {
                 onChange={this.updateFilterText}
                 required={true}
               />
-              {/* <Button variant="primary" type="submit">
-                  <FontAwesomeIcon icon={faMagnifyingGlass} />
-                </Button> */}
             </InputGroup>
           </div>
           <div className="ms-1">
