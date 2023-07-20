@@ -22,7 +22,6 @@ export default class RecipeModal extends Component {
         name: "",
         description: "",
         image: "",
-        theme: "",
       },
       uploadedImage: {
         name: "",
@@ -199,10 +198,6 @@ export default class RecipeModal extends Component {
                 }}
                 rows={3}
               />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Theme</Form.Label>
-              <Form.Control placeholder="Work in Progress" disabled={true} />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>

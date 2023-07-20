@@ -17,7 +17,6 @@ export default class RecipeCanvas extends Component {
         name: "",
         description: "",
         image: "",
-        theme: "",
       },
     };
   }
