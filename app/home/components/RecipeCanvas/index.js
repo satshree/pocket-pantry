@@ -9,14 +9,7 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { toast } from "react-hot-toast";
-import {
-  addDoc,
-  deleteDoc,
-  getDoc,
-  doc,
-  query,
-  collection,
-} from "firebase/firestore";
+import { addDoc, deleteDoc, doc, collection } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faFilePen, faPlus } from "@fortawesome/free-solid-svg-icons";
 
@@ -83,7 +76,9 @@ export default class RecipeCanvas extends Component {
 
       await addDoc(collection(db, "recipes", recipe.id, "sections"), data);
 
-      this.props.fetch();
+      this.props.updateCanvasData(this.state.recipe.id);
+      // this.props.fetch();
+      // setTimeout(() => this.props.updateCanvasData(recipe.id), 1500);
       this.hideNewSectionModal();
       toast.success("New Section Added!");
     } catch (err) {
@@ -122,7 +117,9 @@ export default class RecipeCanvas extends Component {
             doc(db, "recipes", recipe.id, "sections", section.id)
           );
 
-          this.props.fetch();
+          this.props.updateCanvasData(this.state.recipe.id);
+          // this.props.fetch();
+          // setTimeout(() => this.props.updateCanvasData(recipe.id), 1500);
           toast.success("Section Deleted", { id: toastID });
         } catch (err) {
           console.log("ERR", err);
@@ -152,148 +149,160 @@ export default class RecipeCanvas extends Component {
     this.setState({ ...this.state, newSectionModal });
   }
 
-  getSections = () => {
-    let { recipe } = this.state;
-
-    if (recipe.ingredients.length === 0) {
+  getEmptyMessage = () => {
+    if (this.state.recipe.ingredients.length === 0) {
       return (
-        <div className="text-center h-100 text-muted">
-          <small>Add section to continue</small>
-          <br />
-          <small>
+        <React.Fragment>
+          <div className="text-center text-muted">
+            <small>Add section to continue</small>
+            <br />
             <small>
-              Maybe,
-              <br />
-              <i>A section for sauce?</i>
-              <br />
-              <i>A section for gravy?</i>
-              <br />
-              <i>A section for main-course?</i>
+              <small>
+                Maybe,
+                <br />
+                <i>A section for sauce?</i>
+                <br />
+                <i>A section for gravy?</i>
+                <br />
+                <i>A section for main-course?</i>
+              </small>
             </small>
-          </small>
-        </div>
-      );
-    } else {
-      return recipe.ingredients.map((section, index) => (
-        <div className={style.ingredientsectionbox} key={index}>
-          <div className="d-flex align-items-center justify-content-between">
-            <span className={style.ingredientsectiontitle}>
-              {section.section}
-            </span>
-            <div className="d-flex align-items-center justify-content-between">
-              <InputGroup className="m-1">
-                <Form.Control size="sm" placeholder="Ingredient" />
-                <Form.Control size="sm" placeholder="Amount" />
-                <Form.Select size="sm">
-                  <option disabled={true} selected={true}>
-                    Unit
-                  </option>
-                  <option value="ml">ml</option>
-                  <option value="l">l</option>
-                  <option value="gm">gm</option>
-                  <option value="kg">kg</option>
-                  <option value="lbs">lbs</option>
-                  <option value="oz">oz</option>
-                  <option value="fl oz">fl oz</option>
-                </Form.Select>
-                <Button size="sm" variant="primary">
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button>
-              </InputGroup>
-              <Button
-                className="m-1"
-                size="sm"
-                variant="danger"
-                onClick={() => this.deleteSection(section)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </div>
           </div>
-          <br />
-          {section.ingredients.length === 0 ? (
-            <div>
-              <div className="text-center text-muted">
-                <small>Start by adding ingredients</small>
-              </div>
-            </div>
-          ) : (
-            <div></div>
-          )}
-        </div>
-      ));
+        </React.Fragment>
+      );
     }
   };
 
   render() {
     return (
-      <Offcanvas
-        show={this.state.show}
-        onHide={() => this.props.toggle(false, this.props.recipe)}
-        onExited={() => {
-          this.props.toggle(false, {
-            id: "",
-            name: "",
-            description: "",
-            icon: "",
-            ingredients: [],
-          });
-        }}
-        style={{ height: "90%" }}
-        placement="bottom"
-      >
-        <Offcanvas.Header closeButton={true}>
-          <Offcanvas.Title>{this.state.recipe.name}</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <Row className="h-100">
-            <Col md={4}>
-              <pre className={style.descriptionbox}>
-                {this.state.recipe.description}
-              </pre>
-              <div className="text-center">
-                <Button
-                  className="m-1"
-                  size="sm"
-                  variant="outline-secondary"
-                  onClick={() =>
-                    this.props.toggleModal(true, this.state.recipe)
-                  }
-                >
-                  <FontAwesomeIcon icon={faFilePen} />
-                </Button>
-                <Button
-                  className="m-1"
-                  size="sm"
-                  variant="outline-danger"
-                  onClick={() => this.props.deleteRecipe(this.state.recipe.id)}
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                </Button>
-              </div>
-              <hr />
-              <small>Notes work in progress</small>
-            </Col>
-            <Col>
-              <div className={style.ingredientsbox}>
+      <React.Fragment>
+        <Offcanvas
+          show={this.state.show}
+          onHide={() => this.props.toggle(false, this.props.recipe)}
+          onExited={() => {
+            this.props.fetch();
+            this.props.toggle(false, {
+              id: "",
+              name: "",
+              description: "",
+              image: "",
+              ingredients: [],
+            });
+          }}
+          style={{ height: "90%" }}
+          placement="bottom"
+        >
+          <Offcanvas.Header closeButton={true}>
+            <Offcanvas.Title>{this.state.recipe.name}</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            <Row className="h-100">
+              <Col md={4}>
+                <pre className={style.descriptionbox}>
+                  {this.state.recipe.description}
+                </pre>
                 <div className="text-center">
-                  <h5>Ingredients</h5>
-                  <hr />
                   <Button
+                    className="m-1"
                     size="sm"
-                    variant="primary"
-                    onClick={this.showNewSectionModal}
+                    variant="outline-secondary"
+                    onClick={() =>
+                      this.props.toggleModal(true, this.state.recipe)
+                    }
                   >
-                    <FontAwesomeIcon icon={faPlus} className="me-1" />
-                    New Section
+                    <FontAwesomeIcon icon={faFilePen} />
+                  </Button>
+                  <Button
+                    className="m-1"
+                    size="sm"
+                    variant="outline-danger"
+                    onClick={() =>
+                      this.props.deleteRecipe(this.state.recipe.id)
+                    }
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
                   </Button>
                 </div>
-                <br />
-                {this.getSections()}
-              </div>
-            </Col>
-          </Row>
-        </Offcanvas.Body>
+                <hr />
+                <small>Notes work in progress</small>
+              </Col>
+              <Col>
+                <div className={style.ingredientsbox}>
+                  <div className="text-center">
+                    <h5>Ingredients</h5>
+                  </div>
+                  <hr />
+                  {this.getEmptyMessage()}
+                  {this.state.recipe.ingredients.map((section, index) => (
+                    <React.Fragment key={index}>
+                      <div className={style.ingredientsectionbox}>
+                        <div className="d-flex align-items-center justify-content-between">
+                          <span className={style.ingredientsectiontitle}>
+                            {section.section}
+                          </span>
+                          <div className="d-flex align-items-center justify-content-between">
+                            <InputGroup className="m-1">
+                              <Form.Control
+                                size="sm"
+                                placeholder="Ingredient"
+                              />
+                              <Form.Control size="sm" placeholder="Amount" />
+                              <Form.Select size="sm">
+                                <option disabled={true} selected={true}>
+                                  Unit
+                                </option>
+                                <option value="ml">ml</option>
+                                <option value="l">l</option>
+                                <option value="gm">gm</option>
+                                <option value="kg">kg</option>
+                                <option value="lbs">lbs</option>
+                                <option value="oz">oz</option>
+                                <option value="fl oz">fl oz</option>
+                              </Form.Select>
+                              <Button size="sm" variant="primary">
+                                <FontAwesomeIcon icon={faPlus} />
+                              </Button>
+                            </InputGroup>
+                            <Button
+                              className="m-1"
+                              size="sm"
+                              variant="danger"
+                              onClick={() => this.deleteSection(section)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </Button>
+                          </div>
+                        </div>
+                        <br />
+                        {section.ingredients.length === 0 ? (
+                          <div>
+                            <div className="text-center text-muted">
+                              <small>Start by adding ingredients</small>
+                            </div>
+                          </div>
+                        ) : (
+                          <div></div>
+                        )}
+                      </div>
+                    </React.Fragment>
+                  ))}
+                  <br />
+                  <div className="text-center">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={this.showNewSectionModal}
+                    >
+                      <FontAwesomeIcon icon={faPlus} className="me-1" />
+                      New Section
+                    </Button>
+                  </div>
+                  <br />
+                </div>
+              </Col>
+            </Row>
+          </Offcanvas.Body>
+        </Offcanvas>
 
         <Modal
           backdrop="static"
@@ -327,8 +336,11 @@ export default class RecipeCanvas extends Component {
                   disabled={this.state.newSectionModal.progress}
                 >
                   {this.state.newSectionModal.progress ? (
-                    <div class="spinner-border spinner-border-sm" role="status">
-                      <span class="visually-hidden">Loading...</span>
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
                     </div>
                   ) : (
                     "Add"
@@ -347,7 +359,7 @@ export default class RecipeCanvas extends Component {
             </Form>
           </Modal.Body>
         </Modal>
-      </Offcanvas>
+      </React.Fragment>
     );
   }
 }

@@ -73,8 +73,8 @@ export default class Home extends Component {
     this.loadRecipes = this.loadRecipes.bind(this);
     this.deleteRecipe = this.deleteRecipe.bind(this);
     this.getRecipeList = this.getRecipeList.bind(this);
-    this.loadIngredients = this.loadIngredients.bind(this);
     this.updateFilterText = this.updateFilterText.bind(this);
+    this.updateCanvasData = this.updateCanvasData.bind(this);
     this.toggleRecipeModal = this.toggleRecipeModal.bind(this);
     this.toggleRecipeCanvas = this.toggleRecipeCanvas.bind(this);
   }
@@ -100,20 +100,15 @@ export default class Home extends Component {
       let data = {
         id: recipe.id,
         ...recipe.data(),
+        ingredients: [],
       };
+
+      delete data["user"];
 
       recipes.push(data);
     });
 
-    this.setState({ ...this.state, recipes }, () => {
-      if (toastID) toast.dismiss(toastID);
-
-      this.loadIngredients();
-    });
-  }
-
-  async loadIngredients() {
-    let { ingredients, recipes } = this.state;
+    recipes = recipes.reverse();
 
     for (let recipe of recipes) {
       try {
@@ -125,13 +120,18 @@ export default class Home extends Component {
         ingredientDoc.forEach((section) =>
           ingredientsList.push({ id: section.id, ...section.data() })
         );
-        ingredients[recipe.id] = ingredientsList;
+
+        recipe.ingredients = ingredientsList.reverse();
       } catch {
-        ingredients[recipe.id] = [];
+        recipe.ingredients = [];
       }
     }
 
-    this.setState({ ...this.state, ingredients });
+    this.setState({ ...this.state, recipes }, () => {
+      if (toastID) toast.dismiss(toastID);
+    });
+
+    return 1;
   }
 
   updateFilterText(e) {
@@ -167,11 +167,7 @@ export default class Home extends Component {
   }
 
   getRecipeList() {
-    let { filter, recipes, ingredients } = this.state;
-
-    for (let recipe of recipes) {
-      recipe.ingredients = ingredients[recipe.id];
-    }
+    let { filter, recipes } = this.state;
 
     return recipes.filter((recipe) =>
       recipe.name.toLowerCase().includes(filter.text.toLowerCase())
@@ -213,6 +209,27 @@ export default class Home extends Component {
         toast.dismiss(deleteToastID);
       }
     });
+  }
+
+  async updateCanvasData(id) {
+    await this.loadRecipes();
+    return setTimeout(() => {
+      let { recipes } = this.state;
+
+      function getRecipe() {
+        for (let r of recipes) {
+          if (r.id === id) return r;
+        }
+      }
+
+      let recipe = getRecipe();
+      let { canvas } = this.state;
+      canvas.data = recipe;
+
+      this.setState({ ...this.state, canvas });
+
+      return 1;
+    }, 800);
   }
 
   render() {
@@ -264,6 +281,7 @@ export default class Home extends Component {
           toggle={this.toggleRecipeCanvas}
           toggleModal={this.toggleRecipeModal}
           deleteRecipe={this.deleteRecipe}
+          updateCanvasData={this.updateCanvasData}
         />
       </div>
     );
