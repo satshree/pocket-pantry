@@ -1,0 +1,27 @@
+.filterwrapper {
+  width: 50%;
+  margin-right: 0.5rem;
+}
+
+.newbutton {
+  z-index: 1;
+}
+
+@media (max-width: 564px) {
+  .filterwrapper {
+    width: 100%;
+    margin-right: auto;
+  }
+
+  .newbutton {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    border-radius: 50%;
+    font-size: 1rem;
+  }
+
+  .newbutton span {
+    display: none;
+  }
+}

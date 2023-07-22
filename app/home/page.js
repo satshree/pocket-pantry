@@ -22,6 +22,8 @@ import { loadFromLocalStorage } from "@/localStorage";
 
 import { db } from "../page";
 
+import style from "./page.module.css";
+
 import RecipeList from "./components/RecipeList";
 import RecipeModal from "./components/RecipeModal";
 import RecipeCanvas from "./components/RecipeCanvas";
@@ -85,7 +87,7 @@ export default class Home extends Component {
   }
 
   async loadRecipes(toastID = null) {
-    // if (!toastID) toast.loading("Fetching your recipes");
+    // if (!toastID) toastID = toast.loading("Fetching your recipes");
 
     let userID = this.auth.user.uid;
     let { recipes } = this.state;
@@ -234,7 +236,7 @@ export default class Home extends Component {
     return (
       <div>
         <div className="d-flex align-items-center justify-content-center">
-          <div className="me-1 w-50">
+          <div className={style.filterwrapper}>
             <InputGroup>
               <FormControl
                 placeholder="Filter"
@@ -244,16 +246,14 @@ export default class Home extends Component {
               />
             </InputGroup>
           </div>
-          <div className="ms-1">
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => this.toggleRecipeModal(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-              <span className="ms-1">Add New Recipe</span>
-            </Button>
-          </div>
+          <Button
+            className={style.newbutton}
+            variant="primary"
+            onClick={() => this.toggleRecipeModal(true)}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+            <span className="ms-1">Add New Recipe</span>
+          </Button>
         </div>
         <br />
         <div>
