@@ -30,6 +30,38 @@
   font-weight: 500;
 }
 
+/* .ingredientslist {
+} */
+
+.ingredient {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #c2c1c1;
+  margin-bottom: 0.25rem;
+
+  transition: 0.2s;
+}
+
+.ingredient:first-child {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.ingredient:last-child {
+  border-bottom: 0px solid;
+  margin-bottom: auto;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.ingredient:hover {
+  background-color: #f2f2f2;
+  transition: 0.2s;
+}
+
 @media (max-width: 564px) {
   .ingredientinput,
   .ingredientamountinput,

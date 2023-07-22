@@ -9,7 +9,7 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { toast } from "react-hot-toast";
-import { addDoc, deleteDoc, doc, collection } from "firebase/firestore";
+import { addDoc, setDoc, deleteDoc, doc, collection } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faFilePen, faPlus } from "@fortawesome/free-solid-svg-icons";
 
@@ -43,22 +43,40 @@ export default class RecipeCanvas extends Component {
           section: "",
         },
       },
+      addIngredientData: {},
     };
 
     this.addNewSection = this.addNewSection.bind(this);
+    this.addIngredient = this.addIngredient.bind(this);
+    this.deleteIngredient = this.deleteIngredient.bind(this);
     this.showNewSectionModal = this.showNewSectionModal.bind(this);
     this.hideNewSectionModal = this.hideNewSectionModal.bind(this);
     this.resetNewSectionModal = this.resetNewSectionModal.bind(this);
   }
 
   componentDidUpdate() {
-    let { show, recipe } = this.state;
+    let { show, recipe, addIngredientData } = this.state;
 
     if (show !== this.props.show)
       this.setState({ ...this.state, show: this.props.show });
 
-    if (recipe !== this.props.recipe)
-      this.setState({ ...this.state, recipe: this.props.recipe });
+    if (recipe !== this.props.recipe) {
+      this.props.recipe.ingredients.forEach(
+        (section) =>
+          (addIngredientData[section.id] = {
+            section: section.id,
+            ingredient: "",
+            amount: "",
+            unit: "",
+          })
+      );
+
+      this.setState({
+        ...this.state,
+        recipe: this.props.recipe,
+        addIngredientData,
+      });
+    }
   }
 
   async addNewSection(e) {
@@ -148,6 +166,81 @@ export default class RecipeCanvas extends Component {
     this.setState({ ...this.state, newSectionModal });
   }
 
+  async addIngredient(section) {
+    let { addIngredientData, recipe } = this.state;
+
+    const toastID = toast.loading("Adding ingredient...");
+
+    try {
+      let data = {
+        ingredient: addIngredientData[section.id].ingredient,
+        amount: addIngredientData[section.id].amount,
+        unit: addIngredientData[section.id].unit,
+      };
+
+      section.ingredients.push(data);
+
+      await setDoc(
+        doc(db, "recipes", recipe.id, "sections", section.id),
+        section
+      );
+
+      await this.props.fetch();
+      this.props.updateCanvasData(recipe.id);
+      toast.success("New Ingredient Added!", { id: toastID });
+    } catch (err) {
+      console.log("ERROR", err);
+      toast.error("Something went wrong. Please try again", { id: toastID });
+    }
+  }
+
+  deleteIngredient(section, ingredientIndex) {
+    swal({
+      title: "Are you sure to remove this ingredient?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      dangerMode: true,
+      buttons: {
+        confirm: {
+          text: "Yes, Remove",
+          value: true,
+          visible: true,
+        },
+        cancel: {
+          text: "No, Let it be",
+          value: false,
+          visible: true,
+        },
+      },
+    }).then(async (value) => {
+      if (value) {
+        const toastID = toast.loading("Removing ingredient...");
+
+        let { recipe } = this.state;
+
+        try {
+          let data = JSON.parse(JSON.stringify(section));
+          data.ingredients.splice(ingredientIndex, 1);
+          delete data["id"];
+
+          await setDoc(
+            doc(db, "recipes", recipe.id, "sections", section.id),
+            data
+          );
+
+          await this.props.fetch();
+          this.props.updateCanvasData(recipe.id);
+          toast.success("Ingredient Removed!", { id: toastID });
+        } catch (err) {
+          console.log("ERR", err);
+          toast.error("Something went wrong. Please try again", {
+            id: toastID,
+          });
+        }
+      }
+    });
+  }
+
   getEmptyMessage = () => {
     if (this.state.recipe.ingredients.length === 0) {
       return (
@@ -172,6 +265,30 @@ export default class RecipeCanvas extends Component {
       );
     }
   };
+
+  getIngredients = (section) =>
+    section.ingredients.map((ingredient, index) => (
+      <React.Fragment key={index}>
+        <div className={style.ingredient}>
+          <div>{ingredient.ingredient}</div>
+          <div className="d-flex align-items-center justify-content-between">
+            <div>
+              {ingredient.amount} {ingredient.unit}
+            </div>
+            <div className="ms-2">
+              <Button
+                size="sm"
+                variant="danger"
+                style={{ borderRadius: "50%" }}
+                onClick={() => this.deleteIngredient(section, index)}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </React.Fragment>
+    ));
 
   render() {
     return (
@@ -246,16 +363,56 @@ export default class RecipeCanvas extends Component {
                                 size="sm"
                                 placeholder="Ingredient"
                                 className={style.ingredientinput}
+                                value={
+                                  this.state.addIngredientData[section.id]
+                                    .ingredient
+                                }
+                                onChange={(e) => {
+                                  let { addIngredientData } = this.state;
+                                  addIngredientData[section.id].ingredient =
+                                    e.target.value;
+                                  this.setState({
+                                    ...this.state,
+                                    addIngredientData,
+                                  });
+                                }}
                               />
                               <Form.Control
                                 size="sm"
                                 placeholder="Amount"
+                                type="number"
+                                min="0"
                                 className={style.ingredientamountinput}
+                                value={
+                                  this.state.addIngredientData[section.id]
+                                    .amount
+                                }
+                                onChange={(e) => {
+                                  let { addIngredientData } = this.state;
+                                  addIngredientData[section.id].amount =
+                                    e.target.value;
+                                  this.setState({
+                                    ...this.state,
+                                    addIngredientData,
+                                  });
+                                }}
                               />
                               <Form.Select
                                 size="sm"
                                 defaultValue={""}
                                 className={style.ingredientunitinput}
+                                value={
+                                  this.state.addIngredientData[section.id].unit
+                                }
+                                onChange={(e) => {
+                                  let { addIngredientData } = this.state;
+                                  addIngredientData[section.id].unit =
+                                    e.target.value;
+                                  this.setState({
+                                    ...this.state,
+                                    addIngredientData,
+                                  });
+                                }}
                               >
                                 <option value="" disabled={true}>
                                   Unit
@@ -268,7 +425,11 @@ export default class RecipeCanvas extends Component {
                                 <option value="oz">oz</option>
                                 <option value="fl oz">fl oz</option>
                               </Form.Select>
-                              <Button size="sm" variant="primary">
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => this.addIngredient(section)}
+                              >
                                 <FontAwesomeIcon icon={faPlus} />
                               </Button>
                             </InputGroup>
@@ -284,13 +445,13 @@ export default class RecipeCanvas extends Component {
                         </div>
                         <br />
                         {section.ingredients.length === 0 ? (
-                          <div>
-                            <div className="text-center text-muted">
+                          <div className={style.ingredientslist}>
+                            <div className="text-center text-muted p-3">
                               <small>Start by adding ingredients</small>
                             </div>
                           </div>
                         ) : (
-                          <div></div>
+                          this.getIngredients(section)
                         )}
                       </div>
                     </React.Fragment>
