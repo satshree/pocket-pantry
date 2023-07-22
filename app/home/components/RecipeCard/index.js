@@ -29,6 +29,15 @@ export default class RecipeCard extends Component {
     }
   }
 
+  getDescription = () => {
+    let description = this.props.recipe.description;
+
+    if (description.length < 100) {
+      return description;
+    } else {
+      return `${description.slice(0, 100)}......`;
+    }
+  };
   render() {
     return (
       <div className={style.recipecard}>
@@ -73,7 +82,7 @@ export default class RecipeCard extends Component {
             className={style.recipecardbody}
             onClick={() => this.props.toggleCanvas(true, this.props.recipe)}
           >
-            <small>{this.props.recipe.description}</small>
+            <small>{this.getDescription()}</small>
           </Card.Body>
         </Card>
       </div>
