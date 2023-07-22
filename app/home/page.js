@@ -211,9 +211,8 @@ export default class Home extends Component {
     });
   }
 
-  async updateCanvasData(id) {
-    await this.loadRecipes();
-    return setTimeout(() => {
+  updateCanvasData(id) {
+    setTimeout(() => {
       let { recipes } = this.state;
 
       function getRecipe() {
@@ -223,13 +222,13 @@ export default class Home extends Component {
       }
 
       let recipe = getRecipe();
+      console.log("FUCK", recipe);
+
       let { canvas } = this.state;
       canvas.data = recipe;
 
       this.setState({ ...this.state, canvas });
-
-      return 1;
-    }, 800);
+    }, 750);
   }
 
   render() {

@@ -76,9 +76,8 @@ export default class RecipeCanvas extends Component {
 
       await addDoc(collection(db, "recipes", recipe.id, "sections"), data);
 
+      await this.props.fetch();
       this.props.updateCanvasData(this.state.recipe.id);
-      // this.props.fetch();
-      // setTimeout(() => this.props.updateCanvasData(recipe.id), 1500);
       this.hideNewSectionModal();
       toast.success("New Section Added!");
     } catch (err) {
@@ -117,8 +116,8 @@ export default class RecipeCanvas extends Component {
             doc(db, "recipes", recipe.id, "sections", section.id)
           );
 
+          await this.props.fetch();
           this.props.updateCanvasData(this.state.recipe.id);
-          // this.props.fetch();
           // setTimeout(() => this.props.updateCanvasData(recipe.id), 1500);
           toast.success("Section Deleted", { id: toastID });
         } catch (err) {
@@ -155,6 +154,7 @@ export default class RecipeCanvas extends Component {
         <React.Fragment>
           <div className="text-center text-muted">
             <small>Add section to continue</small>
+            <br />
             <br />
             <small>
               <small>
