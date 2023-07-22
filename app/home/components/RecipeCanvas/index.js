@@ -245,9 +245,18 @@ export default class RecipeCanvas extends Component {
                               <Form.Control
                                 size="sm"
                                 placeholder="Ingredient"
+                                className={style.ingredientinput}
                               />
-                              <Form.Control size="sm" placeholder="Amount" />
-                              <Form.Select size="sm" defaultValue={""}>
+                              <Form.Control
+                                size="sm"
+                                placeholder="Amount"
+                                className={style.ingredientamountinput}
+                              />
+                              <Form.Select
+                                size="sm"
+                                defaultValue={""}
+                                className={style.ingredientunitinput}
+                              >
                                 <option value="" disabled={true}>
                                   Unit
                                 </option>

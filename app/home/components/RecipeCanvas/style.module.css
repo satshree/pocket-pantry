@@ -29,3 +29,11 @@
 .ingredientsectiontitle {
   font-weight: 500;
 }
+
+@media (max-width: 564px) {
+  .ingredientinput,
+  .ingredientamountinput,
+  .ingredientunitinput {
+    width: 60px !important;
+  }
+}
