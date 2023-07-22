@@ -222,7 +222,6 @@ export default class Home extends Component {
       }
 
       let recipe = getRecipe();
-      console.log("FUCK", recipe);
 
       let { canvas } = this.state;
       canvas.data = recipe;

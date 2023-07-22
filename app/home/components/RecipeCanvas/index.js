@@ -247,8 +247,8 @@ export default class RecipeCanvas extends Component {
                                 placeholder="Ingredient"
                               />
                               <Form.Control size="sm" placeholder="Amount" />
-                              <Form.Select size="sm">
-                                <option disabled={true} selected={true}>
+                              <Form.Select size="sm" defaultValue={""}>
+                                <option value="" disabled={true}>
                                   Unit
                                 </option>
                                 <option value="ml">ml</option>
