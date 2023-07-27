@@ -46,16 +46,16 @@
   transition: 0.2s;
 }
 
-.ingredient:first-child {
+/* .ingredient:first-child {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-}
+} */
 
 .ingredient:last-child {
   border-bottom: 0px solid;
   margin-bottom: auto;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  /* border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px; */
 }
 
 .ingredient:hover {

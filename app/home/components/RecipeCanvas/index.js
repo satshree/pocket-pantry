@@ -178,16 +178,24 @@ export default class RecipeCanvas extends Component {
         unit: addIngredientData[section.id].unit,
       };
 
-      section.ingredients.push(data);
+      if (!data.ingredient) {
+        toast.error("Enter ingredient!", { id: toastID });
+      } else if (!data.amount) {
+        toast.error("Enter ingredient amount!", { id: toastID });
+      } else if (!data.unit) {
+        toast.error("Select ingredient amount unit!", { id: toastID });
+      } else {
+        section.ingredients.push(data);
 
-      await setDoc(
-        doc(db, "recipes", recipe.id, "sections", section.id),
-        section
-      );
+        await setDoc(
+          doc(db, "recipes", recipe.id, "sections", section.id),
+          section
+        );
 
-      await this.props.fetch();
-      this.props.updateCanvasData(recipe.id);
-      toast.success("New Ingredient Added!", { id: toastID });
+        await this.props.fetch();
+        this.props.updateCanvasData(recipe.id);
+        toast.success("New Ingredient Added!", { id: toastID });
+      }
     } catch (err) {
       console.log("ERROR", err);
       toast.error("Something went wrong. Please try again", { id: toastID });
