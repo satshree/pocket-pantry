@@ -41,7 +41,7 @@
 
   padding: 1.25rem 1.75rem;
   border-bottom: 1px solid #c2c1c1;
-  margin-bottom: 0.25rem;
+  /* margin-bottom: 0.25rem; */
 
   transition: 0.2s;
 }

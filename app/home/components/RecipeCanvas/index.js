@@ -4,6 +4,7 @@ import {
   Row,
   Col,
   Button,
+  ButtonGroup,
   Form,
   Modal,
   InputGroup,
@@ -22,6 +23,19 @@ import style from "./style.module.css";
 //   section: "",
 //   ingredients: [],
 // };
+
+const INGREDIENT_AMOUNT_UNITS = [
+  "ml",
+  "l",
+  "gm",
+  "kg",
+  "lbs",
+  "oz",
+  "fl oz",
+  "teaspoon",
+  "tablespoon",
+  "count",
+];
 
 export default class RecipeCanvas extends Component {
   constructor(props) {
@@ -43,6 +57,17 @@ export default class RecipeCanvas extends Component {
           section: "",
         },
       },
+      editIngredientModal: {
+        show: false,
+        progress: false,
+        data: {
+          section: "",
+          index: "",
+          ingredient: "",
+          amount: "",
+          unit: "",
+        },
+      },
       addIngredientData: {},
     };
 
@@ -52,6 +77,10 @@ export default class RecipeCanvas extends Component {
     this.showNewSectionModal = this.showNewSectionModal.bind(this);
     this.hideNewSectionModal = this.hideNewSectionModal.bind(this);
     this.resetNewSectionModal = this.resetNewSectionModal.bind(this);
+    this.showEditIngredientModal = this.showEditIngredientModal.bind(this);
+    this.hideEditIngredientModal = this.hideEditIngredientModal.bind(this);
+    this.resetEditIngredientModal = this.resetEditIngredientModal.bind(this);
+    this.submitEditIngredientForm = this.submitEditIngredientForm.bind(this);
   }
 
   componentDidUpdate() {
@@ -166,6 +195,33 @@ export default class RecipeCanvas extends Component {
     this.setState({ ...this.state, newSectionModal });
   }
 
+  showEditIngredientModal(data) {
+    let { editIngredientModal } = this.state;
+    editIngredientModal.show = true;
+    editIngredientModal.data = data;
+    this.setState({ ...this.state, editIngredientModal });
+  }
+
+  hideEditIngredientModal() {
+    let { editIngredientModal } = this.state;
+    editIngredientModal.show = false;
+    this.setState({ ...this.state, editIngredientModal });
+  }
+
+  resetEditIngredientModal() {
+    let { editIngredientModal } = this.state;
+    editIngredientModal.show = false;
+    editIngredientModal.progress = false;
+    editIngredientModal.data = {
+      section: "",
+      index: "",
+      ingredient: "",
+      amount: "",
+      unit: "",
+    };
+    this.setState({ ...this.state, editIngredientModal });
+  }
+
   async addIngredient(section) {
     let { addIngredientData, recipe } = this.state;
 
@@ -249,6 +305,41 @@ export default class RecipeCanvas extends Component {
     });
   }
 
+  async submitEditIngredientForm(e) {
+    e.preventDefault();
+
+    let { editIngredientModal, recipe } = this.state;
+    editIngredientModal.progress = true;
+    this.setState({ ...this.state, editIngredientModal });
+
+    try {
+      let { data } = editIngredientModal;
+
+      let ingData = { ...data };
+      delete ingData["section"];
+      delete ingData["index"];
+
+      let ingList = JSON.parse(JSON.stringify(recipe.ingredients));
+      ingList[data.index] = ingData;
+
+      await setDoc(doc(db, "recipes", recipe.id, "sections", data.section.id), {
+        section: data.section.section,
+        ingredients: ingList,
+      });
+
+      await this.props.fetch();
+      this.props.updateCanvasData(this.state.recipe.id);
+      this.hideEditIngredientModal();
+      toast.success("Ingredient Updated!");
+    } catch (err) {
+      console.log("ERR", err);
+      toast.error("Something went wrong. Please try again");
+    }
+
+    editIngredientModal.progress = false;
+    this.setState({ ...this.state, editIngredientModal });
+  }
+
   getEmptyMessage = () => {
     if (this.state.recipe.ingredients.length === 0) {
       return (
@@ -283,15 +374,31 @@ export default class RecipeCanvas extends Component {
             <div>
               {ingredient.amount} {ingredient.unit}
             </div>
-            <div className="ms-2">
-              <Button
-                size="sm"
-                variant="danger"
-                style={{ borderRadius: "50%" }}
-                onClick={() => this.deleteIngredient(section, index)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
+            <div className="ms-5">
+              <ButtonGroup>
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  onClick={() =>
+                    this.showEditIngredientModal({
+                      section: section,
+                      index: index,
+                      ingredient: ingredient.ingredient,
+                      amount: ingredient.amount,
+                      unit: ingredient.unit,
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faFilePen} />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={() => this.deleteIngredient(section, index)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </Button>
+              </ButtonGroup>
             </div>
           </div>
         </div>
@@ -390,6 +497,7 @@ export default class RecipeCanvas extends Component {
                                 placeholder="Amount"
                                 type="number"
                                 min="0"
+                                step="0.01"
                                 className={style.ingredientamountinput}
                                 value={
                                   this.state.addIngredientData[section.id]
@@ -425,13 +533,9 @@ export default class RecipeCanvas extends Component {
                                 <option value="" disabled={true}>
                                   Unit
                                 </option>
-                                <option value="ml">ml</option>
-                                <option value="l">l</option>
-                                <option value="gm">gm</option>
-                                <option value="kg">kg</option>
-                                <option value="lbs">lbs</option>
-                                <option value="oz">oz</option>
-                                <option value="fl oz">fl oz</option>
+                                {INGREDIENT_AMOUNT_UNITS.map((unit) => (
+                                  <option value={unit}>{unit}</option>
+                                ))}
                               </Form.Select>
                               <Button
                                 size="sm"
@@ -530,6 +634,102 @@ export default class RecipeCanvas extends Component {
                   onClick={this.hideNewSectionModal}
                   className="m-1"
                   disabled={this.state.newSectionModal.progress}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
+
+        <Modal
+          backdrop="static"
+          keyboard={false}
+          show={this.state.editIngredientModal.show}
+          onHide={this.hideEditIngredientModal}
+          onExited={this.resetEditIngredientModal}
+          centered={true}
+        >
+          <Modal.Body>
+            <Form onSubmit={this.submitEditIngredientForm}>
+              <Form.Group>
+                <Form.Label>Ingredient</Form.Label>
+                <Form.Control
+                  placeholder="Ingredient Name"
+                  value={this.state.editIngredientModal.data.ingredient}
+                  onChange={(e) => {
+                    let { editIngredientModal } = this.state;
+                    editIngredientModal.data.ingredient = e.target.value;
+                    this.setState({ ...this.state, editIngredientModal });
+                  }}
+                  required={true}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>Amount</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ingredient Amount"
+                  value={this.state.editIngredientModal.data.amount}
+                  onChange={(e) => {
+                    let { editIngredientModal } = this.state;
+                    editIngredientModal.data.amount = e.target.value;
+                    this.setState({ ...this.state, editIngredientModal });
+                  }}
+                  required={true}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>Unit</Form.Label>
+                <Form.Select
+                  placeholder="Ingredient Unit"
+                  defaultValue={""}
+                  value={this.state.editIngredientModal.data.unit}
+                  onChange={(e) => {
+                    let { editIngredientModal } = this.state;
+                    editIngredientModal.data.unit = e.target.value;
+                    this.setState({ ...this.state, editIngredientModal });
+                  }}
+                  required={true}
+                >
+                  <option value="" disabled={true}>
+                    Unit
+                  </option>
+                  {INGREDIENT_AMOUNT_UNITS.map((unit) => (
+                    <option value={unit}>{unit}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <br />
+              <div className="text-center">
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="success"
+                  className="m-1"
+                  disabled={this.state.editIngredientModal.progress}
+                >
+                  {this.state.editIngredientModal.progress ? (
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={this.hideEditIngredientModal}
+                  className="m-1"
+                  disabled={this.state.editIngredientModal.progress}
                 >
                   Cancel
                 </Button>
